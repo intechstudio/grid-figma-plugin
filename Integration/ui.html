@@ -1,0 +1,84 @@
+<h2>Shape Creator</h2>
+<p>Count: <input id="count" type="number" value="5"></p>
+<button id="create">Create</button>
+<button id="cancel">Cancel</button>
+<script>
+
+
+document.getElementById('create').onclick = () => {
+  const textbox = document.getElementById('count');
+  const count = parseInt(textbox.value, 10);
+  parent.postMessage({ pluginMessage: { type: 'create-shapes', count } }, '*')
+  console.log(parent)
+}
+
+document.getElementById('cancel').onclick = () => {
+  parent.postMessage({ pluginMessage: { type: 'cancel' } }, '*')
+}
+
+
+
+console.log("HELLOOOOOO", navigator)
+
+
+
+
+
+let webSocketClient = undefined;
+  let webSocketUrl = "ws://localhost:1337";
+  let connectionCheckInterval = 2000;
+  let receivedMessages = [];
+  let wsClientStatus = undefined;
+  function connectToWebSocket() {
+    if (webSocketClient) {
+      //console.info("WebSocket is already connected, disconnect first.");
+      return;
+    }
+    webSocketClient = new WebSocket(webSocketUrl);
+    webSocketClient.addEventListener("open", function () {
+      wsClientStatus = "open";
+      console.info("WS is open");
+    });
+    webSocketClient.addEventListener("close", function (event) {
+      wsClientStatus = "closed";
+      webSocketClient = null;
+    });
+    webSocketClient.addEventListener("error", function (event) {
+      wsClientStatus = "error";
+      console.info("WS error", event);
+    });
+    webSocketClient.addEventListener("message", function (event) {
+      receivedMessages.push(event.data);
+      const EDITOR_PACKET = JSON.parse(event.data);
+      switch (EDITOR_PACKET["event"]) {
+        case "message":
+          if (EDITOR_PACKET.data != undefined) {
+            const decodedMessage = JSON.parse(EDITOR_PACKET.data);
+            if (decodedMessage.plugin == "figma") {
+              console.log("FIGMA MESSAGE: ", decodedMessage)
+              parent.postMessage({ pluginMessage: { type: 'websocket-message', message: decodedMessage }})
+            }
+          }
+          break;
+        case "grid_ping":
+          console.log("PING RECEIVED FROM EDITOR")
+          webSocketClient.send(JSON.stringify({ event: "grid_pong" }));
+          //parent.postMessage({ pluginMessage: { type: 'websocket-message', message: "ping" }}, '*')
+          //parent.postMessage({ pluginMessage: { type: 'create-shapes', "count": 3 } }, '*')
+          break;
+        default:
+      }
+    });
+  }
+
+
+  setInterval(() => {
+    connectToWebSocket();
+  }, connectionCheckInterval);
+
+  
+  connectToWebSocket();
+
+
+
+</script>
