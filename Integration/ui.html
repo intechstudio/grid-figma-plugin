@@ -53,10 +53,12 @@ let webSocketClient = undefined;
       switch (EDITOR_PACKET["event"]) {
         case "message":
           if (EDITOR_PACKET.data != undefined) {
+
+            console.log("Debug", EDITOR_PACKET)
             const decodedMessage = JSON.parse(EDITOR_PACKET.data);
             if (decodedMessage.plugin == "figma") {
               console.log("FIGMA MESSAGE: ", decodedMessage)
-              parent.postMessage({ pluginMessage: { type: 'websocket-message', message: decodedMessage }})
+              parent.postMessage({ pluginMessage: { type: 'websocket-message', message: decodedMessage.action }}, '*')
             }
           }
           break;

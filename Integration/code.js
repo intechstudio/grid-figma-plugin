@@ -34,6 +34,15 @@ if (figma.editorType === 'figma') {
         else if (msg.type === 'websocket-message') {
             console.log("message: ", msg.message);
             eval(msg.message);
+            // const opacityValue = msg.message;
+            // // Loop through all selected items and set opacity
+            // for (const node of figma.currentPage.selection) {
+            //   if ('opacity' in node) {
+            //     node.opacity = opacityValue;
+            //   }
+            // }
+            // Notify the UI that the operation is complete
+            //figma.ui.postMessage({ type: 'opacity-set' });
         }
         // Make sure to close the plugin when you're done. Otherwise the plugin will
         // keep running, which shows the cancel button at the bottom of the screen.
